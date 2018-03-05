@@ -16,7 +16,9 @@
 		<log4j2.version>2.8.2</log4j2.version>
 		<fastjson.version>1.2.40</fastjson.version>
 		<elasticsearch.version>5.6.3</elasticsearch.version>
-		<spring-elasticsearch.version>3.0.0.RC3</spring-elasticsearch.version>
+		<spring-elasticsearch.version>3.0.5.RELEASE</spring-elasticsearch.version>
+		<spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+		<jetty.version>9.4.7.v20170914</jetty.version>
 	</properties>
 	<licenses>
 		<license>
@@ -25,22 +27,46 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/dev-share/css-elasticsearch</url>
-		<connection>scm:git:git@github.com:dev-share/css-elasticsearch.git</connection>
-		<developerConnection>scm:git:git@github.com:dev-share/css-elasticsearch.git</developerConnection>
+		<url>https://github.com/dev-zy/css-elasticsearch-boot</url>
+		<connection>scm:git:git@github.com:dev-zy/css-elasticsearch-boot.git</connection>
+		<developerConnection>scm:git:git@github.com:dev-zy/css-elasticsearch-boot.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
 			<name>Kervin</name>
 			<email>yi.zhang@ucloudlink.com</email>
-			<url>https://github.com/dev-share/css-elasticsearch</url>
+			<url>https://github.com/dev-zy/css-elasticsearch-boot</url>
 		</developer>
 	</developers>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- (依赖管理：继承一些默认的依赖，工程需要依赖的jar包的管理，申明其他dependency的时候就不需要version) -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-parent</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>${log4j2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -50,7 +76,6 @@
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>transport</artifactId>
-			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
@@ -63,135 +88,268 @@
 			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-elasticsearch</artifactId>
-			<version>${spring-elasticsearch.version}</version>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-jvm</artifactId>
+	    </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-test</artifactId>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
 		</dependency>
 	</dependencies>
-	<profiles>
-		<profile>
-			<id>sonatype-oss-release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<version>3.7.0</version>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- <configuration> <fork>true</fork> </configuration> -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-source</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Change>${maven.build.timestamp}</Change>
+							<Built-Date>${maven.build.timestamp}</Built-Date>
+							<Dependency-Log4j2-Version>${log4j2.version}</Dependency-Log4j2-Version>
+							<Dependency-Fastjson-Version>${fastjson.version}</Dependency-Fastjson-Version>
+							<Dependency-Elasticsearch-Version>${elasticsearch.version}</Dependency-Elasticsearch-Version>
+						</manifestEntries>
+					</archive>
+					<excludes>
+						<exclude>log4j2.properties</exclude>
+						<exclude>application.properties</exclude>
+						<exclude>bin/*</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
 						<configuration>
-							<source>${java.version}</source>
-							<target>${java.version}</target>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>3.0.1</version>
-						<executions>
-							<execution>
-								<id>attach-source</id>
-								<phase>package</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<version>3.0.2</version>
-						<configuration>
-							<archive>
-								<manifestEntries>
-									<Change>${maven.build.timestamp}</Change>
-									<Built-Date>${maven.build.timestamp}</Built-Date>
-									<Dependency-Log4j2-Version>${log4j2.version}</Dependency-Log4j2-Version>
-									<Dependency-Fastjson-Version>${fastjson.version}</Dependency-Fastjson-Version>
-									<Dependency-Elasticsearch-Version>${elasticsearch.version}</Dependency-Elasticsearch-Version>
-								</manifestEntries>
-							</archive>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>2.0.0</version>
+				<configuration>
+					<repositoryLayout>flat</repositoryLayout>
+					<repositoryName>lib</repositoryName>
+					<binFileName>service</binFileName>
+					<binFolder>bin</binFolder>
+					<configurationDirectory>conf</configurationDirectory>
+					<copyConfigurationDirectory>true</copyConfigurationDirectory>
+					<configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
+					<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+					<target>${project.build.directory}</target>
+					<daemons>
+						<daemon>
+							<id>${project.name}</id>
+							<platforms>
+								<platform>jsw</platform>
+							</platforms>
+							<mainClass>com.ucloudlink.css.Application</mainClass>
+							<wrapperLogFile>logs/${project.name}.log</wrapperLogFile>
+							<generatorConfigurations>
+								<generatorConfiguration>
+									<generator>jsw</generator>
+									<includes>
+										<include>macosx-universal-64</include>
+										<include>linux-x86-32</include>
+										<include>linux-x86-64</include>
+										<include>windows-x86-32</include>
+										<include>windows-x86-64</include>
+									</includes>
+									<configuration>
+										<property>
+											<name>configuration.directory.in.classpath.first</name>
+											<value>conf</value>
+										</property>
+										<property>
+											<name>set.default.REPO_DIR</name>
+											<value>lib</value>
+										</property>
+										<property>
+											<name>wrapper.ping.timeout</name>
+											<value>300</value>
+										</property>
+										<property>
+											<name>wrapper.startup.timeout</name>
+											<value>300</value>
+										</property>
+									</configuration>
+								</generatorConfiguration>
+							</generatorConfigurations>
+							<jvmSettings>
+								<extraArguments>
+									<extraArgument>-server</extraArgument>
+									<extraArgument>-Xms128m</extraArgument>
+									<extraArgument>-Xmx128m</extraArgument>
+									<extraArgument>-Xmn60m</extraArgument>
+									<extraArgument>-XX:+UseG1GC</extraArgument>
+									<extraArgument>-Xloggc:/tmp/log/gc.log</extraArgument>
+									<extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
+									<extraArgument>-XX:+PrintGCDetails</extraArgument>
+									<extraArgument>-XX:+PrintGCTimeStamps</extraArgument>
+									<!--火焰图,只支持JDK8 -->
+									<!--<extraArgument>-XX:+PreserveFramePointer</extraArgument> -->
+									<!--测试SSL -->
+									<!--<extraArgument>-Djavax.net.debug=ssl</extraArgument> -->
+									<!--定位OOM时启用 -->
+									<!--<extraArgument>-Dio.netty.leakDetectionLevel=paranoid</extraArgument> -->
+									<!--<extraArgument>-Dio.netty.allocator.tinyCacheSize=0</extraArgument> -->
+									<!--<extraArgument>-Dio.netty.allocator.smallCacheSize=0</extraArgument> -->
+									<!--<extraArgument>-Dio.netty.allocator.normalCacheSize=0</extraArgument> -->
+								</extraArguments>
+							</jvmSettings>
+						</daemon>
+					</daemons>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-jsw-scripts</id>
+						<phase>package</phase>
+						<goals>
+							<goal>generate-daemons</goal>
+							<goal>create-repository</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.1.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.github.edwgiz</groupId>
+						<artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
+						<version>2.1</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
 							<excludes>
-								<exclude>log4j2.properties</exclude>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
 							</excludes>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<executions>
-							<execution>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-shade-plugin</artifactId>
-						<version>3.1.0</version>
-						<dependencies>
-							<dependency>
-								<groupId>com.github.edwgiz</groupId>
-								<artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
-								<version>2.1</version>
-							</dependency>
-						</dependencies>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>shade</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-							<relocations>
-								<relocation>
-									<pattern>org.apache.logging.log4j</pattern>
-									<shadedPattern>org.elasticsearch.log4j</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.fasterxml.jackson</pattern>
-									<shadedPattern>org.elasticsearch.jackson</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>io.netty</pattern>
-									<shadedPattern>org.elasticsearch.io.netty</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.jboss.netty</pattern>
-									<shadedPattern>org.elasticsearch.jboss.netty</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.google</pattern>
-									<shadedPattern>org.elasticsearch.guava</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.alibaba.fastjson</pattern>
-									<shadedPattern>org.elasticsearch.fastjson</shadedPattern>
-								</relocation>
-							</relocations>
-							<transformers>
-								<transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
-							</transformers>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+						</filter>
+					</filters>
+					<relocations>
+						<relocation>
+							<pattern>org.apache.logging.log4j</pattern>
+							<shadedPattern>org.elasticsearch.log4j</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>com.fasterxml.jackson</pattern>
+							<shadedPattern>org.elasticsearch.jackson</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>io.netty</pattern>
+							<shadedPattern>org.elasticsearch.io.netty</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>org.jboss.netty</pattern>
+							<shadedPattern>org.elasticsearch.jboss.netty</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>com.google</pattern>
+							<shadedPattern>org.elasticsearch.guava</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>com.alibaba.fastjson</pattern>
+							<shadedPattern>org.elasticsearch.fastjson</shadedPattern>
+						</relocation>
+					</relocations>
+					<transformers>
+						<transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+					</transformers>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<distributionManagement>
 		<!-- <repository> <id>central</id> <url>http://central.maven.org/maven2/</url> 
 			</repository> -->
