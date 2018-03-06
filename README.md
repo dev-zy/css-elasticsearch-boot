@@ -12,7 +12,7 @@ Elasticsearch与spring-boot集成，解决jar依赖与业务项目jar包的冲�
 ```xml
 <dependency>
     <groupId>com.ucloudlink.css</groupId>
-    <artifactId>css-elasticsearch</artifactId>
+    <artifactId>css-elasticsearch-boot</artifactId>
     <version>5.x.x</version>
 </dependency>
 ```
