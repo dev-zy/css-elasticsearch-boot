@@ -1,6 +1,8 @@
 package com.ucloudlink.css;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -25,11 +28,13 @@ import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendHighRestFactory;
 import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendRestFactory;
 import com.ucloudlink.css.elasticsearch.transport.ElasticsearchExtendTransportFactory;
 import com.ucloudlink.css.util.DateUtil;
-import com.ucloudlink.css.util.NumberUtil;
+import com.ucloudlink.css.util.StringUtil;
 
 @SpringBootApplication
 public class Application implements InitializingBean{
 	private static Logger logger = LogManager.getLogger();
+	@Autowired 
+	private Environment env; 
 	@Autowired
 	private Meter meter;
 	@Autowired
@@ -73,10 +78,81 @@ public class Application implements InitializingBean{
 	 */
 	private static int ES_PARAM_COUNT = 0;
 	/**
+	 * 压测参数
+	 */
+	private static Map<String,String> map = new HashMap<String,String>();
+	/**
 	 * 计数器
 	 */
 	private static AtomicInteger atomic = new AtomicInteger(0);
-	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		init();
+		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
+		if(ES_PARAM_COUNT>6){
+			execute();
+		}else{
+			thread();
+		}
+	}
+	private void init(){
+		String es_thread = map.containsKey("es.thread")?map.get("es.thread"):map.get("elasticsearch.thread");
+		if(StringUtil.isEmpty(es_thread)){
+			es_thread = env.getProperty("es.thread");
+			if(StringUtil.isEmpty(es_thread)){
+				es_thread = env.getProperty("elasticsearch.thread", "1");
+			}
+			map.put("es.thread", es_thread);
+		}
+		ES_THREAD = Integer.valueOf(es_thread);
+		String es_opt = map.containsKey("es.opt")?map.get("es.opt"):map.get("elasticsearch.opt");
+		if(StringUtil.isEmpty(es_opt)){
+			es_opt = env.getProperty("es.opt");
+			if(StringUtil.isEmpty(es_opt)){
+				es_opt = env.getProperty("elasticsearch.opt", "w");
+			}
+			map.put("es.opt", es_opt);
+		}
+		ES_READ_WRITE = es_opt;
+		String es_type = map.containsKey("es.type")?map.get("es.type"):map.get("elasticsearch.type");
+		if(StringUtil.isEmpty(es_type)){
+			es_type = env.getProperty("es.type");
+			if(StringUtil.isEmpty(es_type)){
+				es_type = env.getProperty("elasticsearch.type", "0");
+			}
+			map.put("es.type", es_type);
+		}
+		ES_TYPE = Integer.valueOf(es_type);
+		String es_loop = map.containsKey("es.loop")?map.get("es.loop"):map.get("elasticsearch.loop");
+		if(StringUtil.isEmpty(es_loop)){
+			es_loop = env.getProperty("es.loop");
+			if(StringUtil.isEmpty(es_loop)){
+				es_loop = env.getProperty("elasticsearch.loop", "1");
+			}
+			map.put("es.loop", es_loop);
+		}
+		ES_LOOP = Integer.valueOf(es_loop);
+		String es_data_gt1k = map.containsKey("es.data.gt1k")?map.get("es.data.gt1k"):map.get("elasticsearch.data.gt1k");
+		if(StringUtil.isEmpty(es_data_gt1k)){
+			es_data_gt1k = env.getProperty("es.data.gt1k");
+			if(StringUtil.isEmpty(es_data_gt1k)){
+				es_data_gt1k = env.getProperty("elasticsearch.data.gt1k", "false");
+			}
+			map.put("es.data.gt1k", es_data_gt1k);
+		}
+		ES_DATA_GT_1KB = Boolean.valueOf(es_data_gt1k);
+		String es_threadpool = map.containsKey("es.threadpool")?map.get("es.threadpool"):map.get("elasticsearch.threadpool");
+		if(StringUtil.isEmpty(es_threadpool)){
+			es_threadpool = env.getProperty("es.threadpool");
+			if(StringUtil.isEmpty(es_threadpool)){
+				es_threadpool = env.getProperty("elasticsearch.threadpool");
+			}
+			if(!StringUtil.isEmpty(es_threadpool)){
+				map.put("es.threadpool", es_threadpool);
+			}
+		}
+		ES_PARAM_COUNT = map.size();
+	}
 	private void write(){
 		logger.info("--Write Loop Count:"+ES_LOOP);
 		long start = System.currentTimeMillis();
@@ -218,41 +294,18 @@ public class Application implements InitializingBean{
 			});
 		}
 	}
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
-		if(ES_PARAM_COUNT>6){
-			execute();
-		}else{
-			thread();
-		}
-	}
 	public static void main(String[] args) {
 		if(args!=null&&args.length>0){
 			for(int i=0;i<args.length;i++){
 				String arg = args[i];
-				if(!StringUtils.isEmpty(arg)&&arg.contains("=")){
+				if(!StringUtils.isEmpty(arg)&&map.containsKey("=")){
+					String key = arg.substring(0,arg.indexOf("="));
 					String value = arg.substring(arg.indexOf("=")+1);
-					if(arg.startsWith("base")){
+					if(key.startsWith("base")){
 						System.setProperty("log.path", value);
 					}
-					if((arg.contains("es.thread")||arg.contains("elasticsearch.thread"))&&NumberUtil.isNumber(value)){
-						ES_THREAD = Integer.valueOf(value);
-					}
-					if(arg.contains("es.opt")||arg.contains("elasticsearch.opt")){
-						ES_READ_WRITE = value;
-					}
-					if((arg.contains("es.type")||arg.contains("elasticsearch.type"))&&NumberUtil.isNumber(value)){
-						ES_TYPE = Integer.valueOf(value);
-					}
-					if((arg.contains("es.loop")||arg.contains("elasticsearch.loop"))&&NumberUtil.isNumber(value)){
-						ES_LOOP = Integer.valueOf(value);
-					}
-					if(arg.contains("es.data.gt1k")||arg.contains("es.data.gt1k")){
-						ES_DATA_GT_1KB = Boolean.valueOf(value);
-					}
-					if(arg.contains("es.")||arg.contains("elasticsearch")){
-						ES_PARAM_COUNT++;
+					if(key.contains("es.")||key.contains("elasticsearch")){
+						map.put(key, value);
 					}
 				}
 			}
