@@ -6,10 +6,10 @@
 		<version>9</version>
 	</parent>
 	<groupId>com.ucloudlink.css</groupId>
-	<artifactId>css-elasticsearch</artifactId>
+	<artifactId>css-elasticsearch-boot</artifactId>
 	<version>5.6.3.RELEASE</version>
-	<name>css-elasticsearch</name>
-	<description>css-elasticsearch</description>
+	<name>css-elasticsearch-boot</name>
+	<description>css-elasticsearch-boot</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
