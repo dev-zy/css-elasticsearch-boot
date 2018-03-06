@@ -1,6 +1,5 @@
 # css-elasticsearch-boot
 Elasticsearch与spring-boot集成，解决jar依赖与业务项目jar包的冲突，并扩展HTTP、Rest、Transport接口，支持压力测试
-
 ## 一、jar包冲突
 ```
 1.log4j2
@@ -9,9 +8,7 @@ Elasticsearch与spring-boot集成，解决jar依赖与业务项目jar包的冲�
 4.fastjson
 ```
 ## 二、相关配置及说明
-
-1. Maven配置
-------------
+### 1. Maven配置
 ```xml
 <dependency>
     <groupId>com.ucloudlink.css</groupId>
@@ -19,8 +16,7 @@ Elasticsearch与spring-boot集成，解决jar依赖与业务项目jar包的冲�
     <version>5.x.x</version>
 </dependency>
 ```
-
-2.压测参数
+### 2.压测参数
 ```properties
 es.thread=1	//线程数
 es.opt=w	//压测方式:w(写入[默认])/(读取)
@@ -39,9 +35,7 @@ elasticsearch.data.gt1k=false//压测数据是否大于1KB
 默认使用采用jdk线程方式，若使用线程池方式增加参数：es.threadpool=executor或elasticsearch.threadpool=executor
 
 其他参数参考springboot参数
-3.ES Version VS Log4j Vesion
-----------------------------
-
+### 3.ES Version VS Log4j Vesion
 ES version | Log4j version
 -----------|-----------
 5.6.x | 2.9.0
