@@ -38,8 +38,7 @@ elasticsearch.data.gt1k=false//压测数据是否大于1KB
 ```
 默认使用采用jdk线程方式，若使用线程池方式增加参数：es.threadpool=executor或elasticsearch.threadpool=executor
 
-其他参数为springboot参数
--------------------------------------
+其他参数参考springboot参数
 3.ES Version VS Log4j Vesion
 ----------------------------
 
