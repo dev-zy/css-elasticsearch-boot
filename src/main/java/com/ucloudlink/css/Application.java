@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.UUIDs;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +28,7 @@ import com.ucloudlink.css.util.DateUtil;
 import com.ucloudlink.css.util.NumberUtil;
 
 @SpringBootApplication
-public class Application {
+public class Application implements InitializingBean{
 	private static Logger logger = LogManager.getLogger();
 	@Autowired
 	private Meter meter;
@@ -67,6 +68,10 @@ public class Application {
 	 * 写入数据大于1KB
 	 */
 	private static boolean ES_DATA_GT_1KB = false;
+	/**
+	 * 参数个数
+	 */
+	private static int ES_PARAM_COUNT = 0;
 	/**
 	 * 计数器
 	 */
@@ -213,8 +218,16 @@ public class Application {
 			});
 		}
 	}
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
+		if(ES_PARAM_COUNT>6){
+			execute();
+		}else{
+			thread();
+		}
+	}
 	public static void main(String[] args) {
-		int count=0;
 		if(args!=null&&args.length>0){
 			for(int i=0;i<args.length;i++){
 				String arg = args[i];
@@ -239,18 +252,11 @@ public class Application {
 						ES_DATA_GT_1KB = Boolean.valueOf(value);
 					}
 					if(arg.contains("es.")||arg.contains("elasticsearch")){
-						count++;
+						ES_PARAM_COUNT++;
 					}
 				}
 			}
 		}
 		SpringApplication.run(Application.class, args);
-		Application test = new Application();
-		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
-		if(count>6){
-			test.execute();
-		}else{
-			test.thread();
-		}
 	}
 }
