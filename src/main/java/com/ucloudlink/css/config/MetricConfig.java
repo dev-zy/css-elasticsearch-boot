@@ -22,12 +22,12 @@ public class MetricConfig {
      */
     @Bean
     public ConsoleReporter consoleReporter(MetricRegistry metrics) {
-        return ConsoleReporter.forRegistry(metrics).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.MILLISECONDS).build();
+        return ConsoleReporter.forRegistry(metrics).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
     }
 
     @Bean
     public Slf4jReporter slf4jReporter(MetricRegistry metrics) {
-        return Slf4jReporter.forRegistry(metrics).outputTo(LoggerFactory.getLogger(MetricConfig.class)).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.MILLISECONDS).build();
+        return Slf4jReporter.forRegistry(metrics).outputTo(LoggerFactory.getLogger(MetricConfig.class)).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
     }
 
     @Bean
@@ -41,7 +41,7 @@ public class MetricConfig {
      * @param metrics
      * @return
      */
-    @Bean("tps")
+    @Bean
     public Meter meter(MetricRegistry metrics) {
         return metrics.meter("Metric-TPS");
     }
@@ -55,18 +55,6 @@ public class MetricConfig {
     public Histogram histogram(MetricRegistry metrics) {
         return metrics.histogram("Metric-Histogram");
     }
-
-    /**
-     * 计数器
-     *
-     * @param metrics
-     * @return
-     */
-    @Bean
-    public Counter counter(MetricRegistry metrics) {
-        return metrics.counter("Metric-Counter");
-    }
-
     /**
      * 计时器
      *

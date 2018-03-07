@@ -246,10 +246,10 @@ public class Application implements InitializingBean{
 			final Timer.Context context = timer.time();
 			String result = "";
 			try {
-				if(ES_TYPE==0)result = tfactory.selectAll("transport", "test", query);
-				if(ES_TYPE==1)result = hfactory.selectAll("http", "test", query);
-				if(ES_TYPE==2)result = rfactory.selectAll("rest", "test", query);
-				if(ES_TYPE==3)result = hrfactory.selectAll("high", "test", query);
+				if(ES_TYPE==0)result = hfactory.selectAll("http", "test", query);
+				if(ES_TYPE==1)result = rfactory.selectAll("rest", "test", query);
+				if(ES_TYPE==2)result = hrfactory.selectAll("high", "test", query);
+				if(ES_TYPE==3)result = tfactory.selectAll("transport", "test", query);
 				atomic.incrementAndGet();
 			} catch (Exception e) {
 				e.printStackTrace();
