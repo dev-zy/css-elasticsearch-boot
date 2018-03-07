@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,10 +16,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -87,6 +90,7 @@ public class Application implements InitializingBean{
 	private static AtomicInteger atomic = new AtomicInteger(0);
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		sys();
 		init();
 		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
 		if(ES_PARAM_COUNT>6){
@@ -94,6 +98,15 @@ public class Application implements InitializingBean{
 		}else{
 			thread();
 		}
+	}
+	private void sys(){
+		Runtime sys = Runtime.getRuntime();
+		int core = sys.availableProcessors();
+		double free_mem = sys.freeMemory()/(1024*1024*1024);
+		double max_mem = sys.maxMemory()/(1024*1024*1024);
+		double total_mem = sys.totalMemory()/(1024*1024*1024);
+		ES_THREAD = core*2;
+		logger.info("--sys_core:"+core+",free_mem:"+free_mem+",max_mem:"+max_mem+",total_mem:"+total_mem+"---------");
 	}
 	private void init(){
 		String es_thread = map.containsKey("es.thread")?map.get("es.thread"):map.get("elasticsearch.thread");
@@ -104,7 +117,7 @@ public class Application implements InitializingBean{
 			}
 			map.put("es.thread", es_thread);
 		}
-		ES_THREAD = Integer.valueOf(es_thread);
+		ES_THREAD = StringUtil.isEmpty(es_thread)?ES_THREAD:Integer.valueOf(es_thread);
 		String es_opt = map.containsKey("es.opt")?map.get("es.opt"):map.get("elasticsearch.opt");
 		if(StringUtil.isEmpty(es_opt)){
 			es_opt = env.getProperty("es.opt");
@@ -113,7 +126,7 @@ public class Application implements InitializingBean{
 			}
 			map.put("es.opt", es_opt);
 		}
-		ES_READ_WRITE = es_opt;
+		ES_READ_WRITE = StringUtil.isEmpty(es_opt)?ES_READ_WRITE:es_opt;
 		String es_type = map.containsKey("es.type")?map.get("es.type"):map.get("elasticsearch.type");
 		if(StringUtil.isEmpty(es_type)){
 			es_type = env.getProperty("es.type");
@@ -122,7 +135,7 @@ public class Application implements InitializingBean{
 			}
 			map.put("es.type", es_type);
 		}
-		ES_TYPE = Integer.valueOf(es_type);
+		ES_TYPE = StringUtil.isEmpty(es_type)?ES_TYPE:Integer.valueOf(es_type);
 		String es_loop = map.containsKey("es.loop")?map.get("es.loop"):map.get("elasticsearch.loop");
 		if(StringUtil.isEmpty(es_loop)){
 			es_loop = env.getProperty("es.loop");
@@ -131,7 +144,7 @@ public class Application implements InitializingBean{
 			}
 			map.put("es.loop", es_loop);
 		}
-		ES_LOOP = Integer.valueOf(es_loop);
+		ES_LOOP = StringUtil.isEmpty(es_loop)?ES_LOOP:Integer.valueOf(es_loop);
 		String es_data_gt1k = map.containsKey("es.data.gt1k")?map.get("es.data.gt1k"):map.get("elasticsearch.data.gt1k");
 		if(StringUtil.isEmpty(es_data_gt1k)){
 			es_data_gt1k = env.getProperty("es.data.gt1k");
@@ -140,7 +153,7 @@ public class Application implements InitializingBean{
 			}
 			map.put("es.data.gt1k", es_data_gt1k);
 		}
-		ES_DATA_GT_1KB = Boolean.valueOf(es_data_gt1k);
+		ES_DATA_GT_1KB = StringUtil.isEmpty(es_data_gt1k)?ES_DATA_GT_1KB:Boolean.valueOf(es_data_gt1k);
 		String es_threadpool = map.containsKey("es.threadpool")?map.get("es.threadpool"):map.get("elasticsearch.threadpool");
 		if(StringUtil.isEmpty(es_threadpool)){
 			es_threadpool = env.getProperty("es.threadpool");
@@ -201,10 +214,10 @@ public class Application implements InitializingBean{
 			final Timer.Context context = timer.time();
 			String result = "";
 			try {
-				if(ES_TYPE==0)result = hfactory.insert("http", "test", json.toJSONString());
-				if(ES_TYPE==1)result = rfactory.insert("rest", "test", json.toJSONString());
-				if(ES_TYPE==2)result = hrfactory.insert("high", "test", json.toJSONString());
-				if(ES_TYPE==3)result = tfactory.insert("transport", "test", json.toJSONString());
+				if(ES_TYPE==0)result = hfactory.insert("http", "test", json);
+				if(ES_TYPE==1)result = rfactory.insert("rest", "test", json);
+				if(ES_TYPE==2)result = hrfactory.insert("high", "test", json);
+				if(ES_TYPE==3)result = tfactory.insert("transport", "test", json);
 				atomic.incrementAndGet();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -301,7 +314,7 @@ public class Application implements InitializingBean{
 				if(!StringUtils.isEmpty(arg)&&map.containsKey("=")){
 					String key = arg.substring(0,arg.indexOf("="));
 					String value = arg.substring(arg.indexOf("=")+1);
-					if(key.startsWith("base")){
+					if(key.startsWith("base.path")||key.startsWith("-base.path")){
 						System.setProperty("log.path", value);
 					}
 					if(key.contains("es.")||key.contains("elasticsearch")){
@@ -310,6 +323,8 @@ public class Application implements InitializingBean{
 				}
 			}
 		}
-		SpringApplication.run(Application.class, args);
+		ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
+		ConsoleReporter console = ctx.getBean(ConsoleReporter.class);
+		console.start(10, TimeUnit.SECONDS);
 	}
 }
