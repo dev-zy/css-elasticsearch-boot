@@ -3,7 +3,7 @@ path="${BASH_SOURCE-$0}"
 path="$(dirname "${path}")"
 path="$(cd "${path}";pwd)"
 base=${path}/..
-base_path="$(cd "${path}";pwd)"
+base_path="$(cd "${base}";pwd)"
 
 app_name=css-elasticsearch-boot
 conf=${base_path}/config/application.properties

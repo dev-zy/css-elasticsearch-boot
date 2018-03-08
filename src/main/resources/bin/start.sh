@@ -3,7 +3,7 @@ path="${BASH_SOURCE-$0}"
 path="$(dirname "${path}")"
 path="$(cd "${path}";pwd)"
 base=${path}/..
-base_path="$(cd "${path}";pwd)"
+base_path="$(cd "${base}";pwd)"
 
 app_name=css-elasticsearch-boot
 conf=${base_path}/config/application.properties
@@ -29,11 +29,11 @@ if [ -f $log ] ; then
 	rm -rf $pid
 fi
 
-if [ -d ${base_path}/logs ] ; then
+if [ ! -d ${base_path}/logs ] ; then
 	mkdir -p ${base_path}/logs
 fi
 
-if [ -d ${base_path}/data ] ; then
+if [ ! -d ${base_path}/data ] ; then
 	mkdir -p ${base_path}/data
 fi
 
