@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.alibaba.fastjson.JSONObject;
 import com.ucloudlink.css.Application;
 import com.ucloudlink.css.elasticsearch.http.ElasticsearchExtendHttpFactory;
-import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendHighRestFactory;
 import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendRestFactory;
 import com.ucloudlink.css.elasticsearch.transport.ElasticsearchExtendTransportFactory;
 @RunWith(SpringRunner.class)
@@ -28,8 +27,8 @@ public class ElasticsearchTest {
 	private ElasticsearchExtendHttpFactory hfactory;
 	@Autowired
 	private ElasticsearchExtendRestFactory rfactory;
-	@Autowired
-	private ElasticsearchExtendHighRestFactory hrfactory;
+//	@Autowired
+//	private ElasticsearchExtendHighRestFactory hrfactory;
 	@Test
 	public void test(){
 		JSONObject json = new JSONObject();

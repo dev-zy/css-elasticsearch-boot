@@ -1,11 +1,11 @@
-#!/bin/bash
+﻿#!/bin/bash
 path="${BASH_SOURCE-$0}"
 path="$(dirname "${path}")"
 path="$(cd "${path}";pwd)"
 base=${path}/..
 base_path="$(cd "${path}";pwd)"
 
-app_name=css-code-loaded
+app_name=css-elasticsearch-boot
 conf=${base_path}/config/application.properties
 log=${base_path}/logs/${app_name}.log
 pid=${base_path}/data/${app_name}.pid

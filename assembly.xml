@@ -33,6 +33,7 @@
 		<fileSet>
 			<directory>${project.basedir}/target/classes/bin</directory>
 			<outputDirectory>./bin</outputDirectory>
+			<fileMode>0777</fileMode>
 			<includes>
 				<include>*.sh</include>
 				<include>*.bat</include>
