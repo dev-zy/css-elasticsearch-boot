@@ -6,7 +6,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.elasticsearch.client.TransportClientFactoryBean;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.ucloudlink.css.util.StringUtil;
 
 public class ElasticsearchSpringFactory {
@@ -101,5 +106,24 @@ public class ElasticsearchSpringFactory {
 	
 	public ElasticsearchTemplate getTemplate(){
 		return template;
+	}
+	public String insert(String index, String type, Object json) {
+		String source = json instanceof String ?json.toString():JSON.toJSONString(json);
+		IndexQuery query = new IndexQuery();
+		query.setIndexName(index);
+		query.setType(type);
+		query.setSource(source);
+		String result = template.index(query);
+		return result;
+	}
+	public String selectAll(String indices, String types, String condition) {
+		if(StringUtil.isEmpty(indices))indices="_all";
+		Criteria criteria = new Criteria();
+		criteria.expression(condition);
+		CriteriaQuery query = new CriteriaQuery(criteria);
+		query.addIndices(indices);
+		query.addTypes(types);
+		String result = JSON.toJSONString(template.queryForList(query, JSONArray.class));
+		return result;
 	}
 }

@@ -31,6 +31,7 @@ import com.codahale.metrics.Timer;
 import com.ucloudlink.css.elasticsearch.http.ElasticsearchExtendHttpFactory;
 import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendHighRestFactory;
 import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendRestFactory;
+import com.ucloudlink.css.elasticsearch.spring.ElasticsearchSpringFactory;
 import com.ucloudlink.css.elasticsearch.transport.ElasticsearchExtendTransportFactory;
 import com.ucloudlink.css.util.DateUtil;
 import com.ucloudlink.css.util.StringUtil;
@@ -56,8 +57,8 @@ public class Application implements ApplicationContextAware,InitializingBean{
 	private ElasticsearchExtendRestFactory rfactory;
 	@Autowired
 	private ElasticsearchExtendHighRestFactory hrfactory;
-//	@Autowired
-//	private ElasticsearchTemplate sfactory;
+	@Autowired
+	private ElasticsearchSpringFactory sfactory;
 	/**
 	 * 访问方式:0.HTTP[标准HTTP方式],1.Rest[内置HTTP方式],2.HighRest[内置HTTP方式],3.Transport方式[内置接口],4.Spring方式[内置接口]
 	 */
@@ -125,7 +126,7 @@ public class Application implements ApplicationContextAware,InitializingBean{
 			}
 			map.put("es.thread", es_thread);
 		}
-		ES_THREAD = StringUtil.isEmpty(es_thread)?ES_THREAD:Integer.valueOf(es_thread);
+		ES_THREAD = StringUtil.isEmpty(es_thread)||Integer.valueOf(es_thread)<1?ES_THREAD:Integer.valueOf(es_thread);
 		String es_opt = map.containsKey("es.opt")?map.get("es.opt"):map.get("elasticsearch.opt");
 		if(StringUtil.isEmpty(es_opt)){
 			es_opt = env.getProperty("es.opt");
@@ -226,6 +227,7 @@ public class Application implements ApplicationContextAware,InitializingBean{
 				if(ES_TYPE==1)result = rfactory.insert("rest", "test", json);
 				if(ES_TYPE==2)result = hrfactory.insert("high", "test", json);
 				if(ES_TYPE==3)result = tfactory.insert("transport", "test", json);
+				if(ES_TYPE==4)result = sfactory.insert("spring", "test", json);
 				atomic.incrementAndGet();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -260,6 +262,7 @@ public class Application implements ApplicationContextAware,InitializingBean{
 				if(ES_TYPE==1)result = rfactory.selectAll("rest", "test", query);
 				if(ES_TYPE==2)result = hrfactory.selectAll("high", "test", query);
 				if(ES_TYPE==3)result = tfactory.selectAll("transport", "test", query);
+				if(ES_TYPE==4)result = sfactory.selectAll("spring", "test", query);
 				atomic.incrementAndGet();
 			} catch (Exception e) {
 				e.printStackTrace();

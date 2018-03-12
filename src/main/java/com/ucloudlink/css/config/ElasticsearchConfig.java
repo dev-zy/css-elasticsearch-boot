@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 
 import com.ucloudlink.css.elasticsearch.http.ElasticsearchExtendHttpFactory;
 import com.ucloudlink.css.elasticsearch.rest.ElasticsearchExtendHighRestFactory;
@@ -101,7 +100,7 @@ public class ElasticsearchConfig {
 		return factory;
 	}
 	@Bean
-	public ElasticsearchTemplate springES() throws Exception {
+	public ElasticsearchSpringFactory springES() throws Exception {
 		logger.info("-----spring elasticsearch config init.-------");
 		ElasticsearchSpringFactory factory = new ElasticsearchSpringFactory();
 		factory.setClusterName(clusterName);
@@ -110,7 +109,7 @@ public class ElasticsearchConfig {
 		factory.setPassword(password);
 		if(!StringUtil.isEmpty(tport))factory.setPort(Integer.valueOf(tport));
 		factory.init();
-		return factory.getTemplate();
+		return factory;
 	}
 
 }
