@@ -42,8 +42,8 @@ if [ "$JAVA_HOME" != "" ]; then
 else
   JAVA=java
 fi
-
-JAVA_OPTS=" -Xms2g -Xmx2g -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -server -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
+JAVA_ENV="-server -Xms2g -Xmx2g -Xss1m "
+JAVA_OPTS="$JAVA_ENV -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
 
 for i in "${base_path}"/lib/*.jar
 do
@@ -69,7 +69,7 @@ then
 	
 	echo ${app_name} Starting ...
 	# $JAVA $JAVA_OPTS -classpath=.:$CLASSPATH -cp $app:"${base_path}"/*.jar com.ucloudlink.css.Application -spring.config.location=$conf >$log 2>&1 &
-	$JAVA -jar $app -spring.config.location=$conf -base.path=${base_path} >$log 2>&1 &
+	$JAVA $JAVA_OPTS -jar $app -spring.config.location=$conf -base.path=${base_path} >$log 2>&1 &
 	echo $! > $pid
 	
 	kid = `ps -ef |grep ${app_name}|grep -v grep|awk '{print $2}'`

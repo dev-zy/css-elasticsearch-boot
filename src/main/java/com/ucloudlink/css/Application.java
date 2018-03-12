@@ -7,16 +7,18 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.UUIDs;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +36,7 @@ import com.ucloudlink.css.util.DateUtil;
 import com.ucloudlink.css.util.StringUtil;
 
 @SpringBootApplication
-public class Application implements InitializingBean{
+public class Application implements ApplicationContextAware,InitializingBean{
 	private static Logger logger = LogManager.getLogger();
 	@Autowired 
 	private Environment env; 
@@ -54,7 +56,7 @@ public class Application implements InitializingBean{
 	private ElasticsearchExtendRestFactory rfactory;
 	@Autowired
 	private ElasticsearchExtendHighRestFactory hrfactory;
-	@Autowired
+//	@Autowired
 //	private ElasticsearchTemplate sfactory;
 	/**
 	 * 访问方式:0.HTTP[标准HTTP方式],1.Rest[内置HTTP方式],2.HighRest[内置HTTP方式],3.Transport方式[内置接口],4.Spring方式[内置接口]
@@ -87,12 +89,18 @@ public class Application implements InitializingBean{
 	/**
 	 * 计数器
 	 */
-	private static AtomicInteger atomic = new AtomicInteger(0);
+	private static AtomicLong atomic = new AtomicLong(0);
+	@Override
+	public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+		ConsoleReporter console = ctx.getBean(ConsoleReporter.class);
+		console.start(10, TimeUnit.SECONDS);
+	}
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		sys();
 		init();
 		logger.info("--{es_loop:"+ES_LOOP+",es_read_write:"+ES_READ_WRITE+",ES_THREAD:"+ES_THREAD+",ES_TYPE:"+ES_TYPE+"[0.HTTP,1.Rest,2.HighRest,3.Transport,4.Spring(unknow)]}--");
+		Thread.sleep(10*1000);
 		if(ES_PARAM_COUNT>6){
 			execute();
 		}else{
@@ -113,7 +121,7 @@ public class Application implements InitializingBean{
 		if(StringUtil.isEmpty(es_thread)){
 			es_thread = env.getProperty("es.thread");
 			if(StringUtil.isEmpty(es_thread)){
-				es_thread = env.getProperty("elasticsearch.thread", "1");
+				es_thread = env.getProperty("elasticsearch.thread");
 			}
 			map.put("es.thread", es_thread);
 		}
@@ -232,7 +240,9 @@ public class Application implements InitializingBean{
 			double ss = time % 60;
 			int mm = Double.valueOf(time / 60).intValue() % 60;
 			int hh = Double.valueOf(time / 60 / 60).intValue() % 60;
-			logger.info("["+atomic.get()+"]ES Write 耗时:"+(hh>0?hh+"小时":"")+(mm>0?mm+"分钟":"")+ss+"秒-------------"+result);
+			if(atomic.get()%10000==0){
+				logger.info("["+atomic.get()+"]ES Write 耗时:"+(hh>0?hh+"小时":"")+(mm>0?mm+"分钟":"")+ss+"秒-------------"+result);
+			}
 		}
 	}
 	private void read(){
@@ -264,7 +274,9 @@ public class Application implements InitializingBean{
 			double ss = time % 60;
 			int mm = Double.valueOf(time / 60).intValue() % 60;
 			int hh = Double.valueOf(time / 60 / 60).intValue() % 60;
-			logger.info("["+atomic.get()+"]ES Read 耗时:"+(hh>0?hh+"小时":"")+(mm>0?mm+"分钟":"")+ss+"秒-------------"+result.length());
+			if(atomic.get()%10000==0){
+				logger.info("["+atomic.get()+"]ES Read 耗时:"+(hh>0?hh+"小时":"")+(mm>0?mm+"分钟":"")+ss+"秒-------------"+result.length());
+			}
 		}
 	}
 	
@@ -323,8 +335,6 @@ public class Application implements InitializingBean{
 				}
 			}
 		}
-		ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
-		ConsoleReporter console = ctx.getBean(ConsoleReporter.class);
-		console.start(10, TimeUnit.SECONDS);
+		SpringApplication.run(Application.class, args);
 	}
 }
