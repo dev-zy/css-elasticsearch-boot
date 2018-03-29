@@ -145,6 +145,7 @@ public class HttpUtil {
 				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
 				http.setHeader("Authorization", authorization);
 			}
+			http.setHeader("Connection", "close");
 			httpResponse = httpClient.execute(http);
 			HttpEntity entity = httpResponse.getEntity();
 			result = EntityUtils.toString(entity,Consts.UTF_8);
@@ -173,6 +174,7 @@ public class HttpUtil {
 				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
 				connection.setRequestProperty("Authorization", authorization);
 			}
+			connection.setRequestProperty("Connection", "close");
 			if(param!=null&&!"".equals(param)){
 				connection.setDoInput(true);
 				connection.setDoOutput(true);
@@ -255,10 +257,10 @@ public class HttpUtil {
 //		String body = "{\"query\":{\"match\":{\"operator\":\"test\"}}}";
 		String body = "{\"name\":\"mobile music\",\"operator\":\"10000\",\"content\":\"I like music!\",\"createTime\":\"2017-04-20\"}";
 		String result = null;
-		String auth="elastic:elastic";
-		result = checkConnection("http://127.0.0.1:9200",auth)+"";
-		result = httpRequest(url, method, body,null);
+//		String auth="elastic:elastic";
+		result = checkConnection("http://127.0.0.1:9200",null)+"";
 		System.out.println(result);
+		result = httpRequest(url, method, body,null);
 		System.out.println("---------------------------------------------------------");
 //		result = urlRequest(url, method, param);
 		System.out.println(result);

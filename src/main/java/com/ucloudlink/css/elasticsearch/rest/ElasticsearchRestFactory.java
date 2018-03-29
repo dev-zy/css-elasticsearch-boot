@@ -124,15 +124,16 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 	public RestClient getClient(){
 		return client;
 	}
-	public String base(String uri,String method,String body){
+	public String base(String uri,String method,Object obj){
 		try {
 			Map<String, String> params = Collections.emptyMap();
 			if(!uri.contains("?v")&&method.equalsIgnoreCase("get")){
 				params.put("pretty", "true");
 			}
 			HttpEntity entity = null;
-			if(body!=null){
-				body = uri.contains("_bulk")?body:JSON.parseObject(body).toJSONString();
+			String body = null;
+			if(obj!=null){
+				body = uri.contains("_bulk")?body:(obj instanceof String ?((String)obj):JSON.toJSONString(obj));
 				entity = new NStringEntity(body, ContentType.APPLICATION_JSON);
 			}
 			Response response = client.performRequest(method, uri, params, entity); 
@@ -221,9 +222,7 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 	@Override
 	public String insert(String index, String type, Object json) {
 		String uri = "/"+index+"/"+type;
-		String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-		JSONObject body = JSON.parseObject(source);
-		String result = base(uri, HttpUtil.METHOD_POST,  body.toJSONString());
+		String result = base(uri, HttpUtil.METHOD_POST,  json);
 		return result;
 	}
 
@@ -233,9 +232,7 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 		String result = base(uri, HttpUtil.METHOD_GET,null);
 		JSONObject target = JSON.parseObject(result);
 		if(target.getBooleanValue("found")){
-			String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-			JSONObject body = JSON.parseObject(source);
-			result = base(uri, HttpUtil.METHOD_PUT, body.toJSONString());
+			result = base(uri, HttpUtil.METHOD_PUT, json);
 		}
 		return result;
 	}
@@ -243,9 +240,7 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 	@Override
 	public String upsert(String index, String type, String id, Object json) {
 		String uri = "/"+index+"/"+type+"/"+id;
-		String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-		JSONObject body = JSON.parseObject(source);
-		String result = base(uri, HttpUtil.METHOD_PUT, body.toJSONString());
+		String result = base(uri, HttpUtil.METHOD_PUT, json);
 		return result;
 	}
 	@Override

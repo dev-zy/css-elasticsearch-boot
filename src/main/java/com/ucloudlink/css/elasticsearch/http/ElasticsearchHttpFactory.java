@@ -81,14 +81,15 @@ public class ElasticsearchHttpFactory extends AbstractElasticsearchFactory{
 		}
 	}
 	
-	public String base(String uri,String method,String body){
+	public String base(String uri,String method,Object obj){
 		try {
 			String url = uri;
 			if(uri!=null&&!(uri.startsWith("http://")||uri.startsWith("https://"))){
 				url= api+(uri.startsWith("/")?"":"/")+uri;
 			}
-			if(body!=null){
-				body = url.contains("_bulk")?body:JSON.parseObject(body).toJSONString();
+			String body = null;
+			if(obj!=null){
+				body = url.contains("_bulk")?body:(obj instanceof String ?((String)obj):JSON.toJSONString(obj));
 			}
 			String result  = HttpUtil.urlRequest(url, method, body, auth);
 			if(result!=null&&result.contains("Connection refused")){
@@ -158,14 +159,14 @@ public class ElasticsearchHttpFactory extends AbstractElasticsearchFactory{
 		JSONObject target = JSON.parseObject(result);
 		if(target!=null&&target.getIntValue("status")==404){
 			String body="{mappings:{"+type+":{properties:"+JSON.toJSONString(reflect(clazz, isCustom))+"}},settings:"+analyzer(index).toJSONString()+"}";
-			result = base(uri, HttpUtil.METHOD_PUT, JSON.parseObject(body).toJSONString());
+			result = base(uri, HttpUtil.METHOD_PUT, JSON.parseObject(body));
 		}else{
 			if(!(target!=null&&target.getJSONObject(index).getJSONObject("settings").getJSONObject("index").containsKey("analysis")&&target.getJSONObject(index).getJSONObject("settings").getJSONObject("index").getJSONObject("analysis").getJSONObject("analyzer").containsKey("es_analyzer"))){
 				isCustom = false;
 			}
 			if(!(target!=null&&target.getJSONObject(index).getJSONObject("mappings").containsKey(type))){
 				String body = "{properties:"+JSON.toJSONString(reflect(clazz, isCustom))+"}";
-				result = base(uri+"/_mapping/"+type, HttpUtil.METHOD_PUT, JSON.parseObject(body).toJSONString());
+				result = base(uri+"/_mapping/"+type, HttpUtil.METHOD_PUT, JSON.parseObject(body));
 			}
 		}
 		return result;
@@ -174,9 +175,7 @@ public class ElasticsearchHttpFactory extends AbstractElasticsearchFactory{
 	@Override
 	public String insert(String index, String type, Object json) {
 		String uri = "/"+index+"/"+type;
-		String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-		JSONObject body = JSON.parseObject(source);
-		String result = base(uri, HttpUtil.METHOD_POST,  body.toJSONString());
+		String result = base(uri, HttpUtil.METHOD_POST,  json);
 		return result;
 	}
 
@@ -186,9 +185,7 @@ public class ElasticsearchHttpFactory extends AbstractElasticsearchFactory{
 		String result = base(uri, HttpUtil.METHOD_GET,null);
 		JSONObject target = JSON.parseObject(result);
 		if(target.getBooleanValue("found")){
-			String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-			JSONObject body = JSON.parseObject(source);
-			result = base(uri, HttpUtil.METHOD_PUT, body.toJSONString());
+			result = base(uri, HttpUtil.METHOD_PUT, json);
 		}
 		return result;
 	}
@@ -196,9 +193,7 @@ public class ElasticsearchHttpFactory extends AbstractElasticsearchFactory{
 	@Override
 	public String upsert(String index, String type, String id, Object json) {
 		String uri = "/"+index+"/"+type+"/"+id;
-		String source = json instanceof String ?json.toString():JSON.toJSONString(json);
-		JSONObject body = JSON.parseObject(source);
-		String result = base(uri, HttpUtil.METHOD_PUT, body.toJSONString());
+		String result = base(uri, HttpUtil.METHOD_PUT, json);
 		return result;
 	}
 	@Override
