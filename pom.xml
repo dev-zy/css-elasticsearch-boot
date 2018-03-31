@@ -18,6 +18,7 @@
 		<elasticsearch.version>5.6.8</elasticsearch.version>
 		<spring-elasticsearch.version>3.0.5.RELEASE</spring-elasticsearch.version>
 		<spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+		<!-- <spring-boot.version>1.5.10.RELEASE</spring-boot.version> -->
 		<jetty.version>9.4.7.v20170914</jetty.version>
 	</properties>
 	<licenses>
@@ -94,6 +95,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>  
+		        <exclusion>  
+		            <groupId>org.springframework.boot</groupId>  
+		            <artifactId>spring-boot-starter-tomcat</artifactId>  
+		        </exclusion>  
+		    </exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>  
+		    <artifactId>spring-boot-starter-jetty</artifactId>  
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
