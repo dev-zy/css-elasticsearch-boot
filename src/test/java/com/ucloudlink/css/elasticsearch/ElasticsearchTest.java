@@ -100,6 +100,7 @@ public class ElasticsearchTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		System.out.println(ES_TYPE+"(0.HTTP[标准HTTP方式],1.Rest[内置HTTP方式],2.HighRest[内置HTTP方式],3.Transport方式[内置接口],4.Spring方式[内置接口])ES Read -------------"+result);
 	}
 }
