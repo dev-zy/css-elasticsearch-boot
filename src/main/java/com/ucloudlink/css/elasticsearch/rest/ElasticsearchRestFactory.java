@@ -34,7 +34,8 @@ import com.ucloudlink.css.util.StringUtil;
 
 public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 	private static Logger logger = LogManager.getLogger();
-	private RestClient client=null;
+	private RestClient client = null;
+	private RestClientBuilder builder = null;
 	
 	protected static int DEFAULT_PORT = 9200;
 	
@@ -79,13 +80,7 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 			}
 			HttpHost[] hosts = new HttpHost[list.size()];
 			list.toArray(hosts);
- 			RestClientBuilder builder = RestClient.builder(hosts);
-// 			if(!StringUtil.isEmpty(username)&&!StringUtil.isEmpty(password)){
-//				String auth = username+":"+password;
-//				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
-//				Header[] headers = new Header[]{new BasicHeader("Authorization", authorization)};
-//				builder.setDefaultHeaders(headers);
-//			}
+ 			builder = RestClient.builder(hosts);
  			builder.setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
  	            @Override
  	            public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder config) {
@@ -121,8 +116,11 @@ public class ElasticsearchRestFactory extends AbstractElasticsearchFactory{
 			}
 		}
 	}
-	public RestClient getClient(){
+	public RestClient client(){
 		return client;
+	}
+	public RestClientBuilder builder(){
+		return builder;
 	}
 	public String base(String uri,String method,Object obj){
 		try {

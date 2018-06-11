@@ -66,7 +66,7 @@ public class ElasticsearchHighRestFactory extends ElasticsearchRestFactory{
 	public void init(){
 		try {
 			super.init();
-			xclient = new RestHighLevelClient(super.getClient());
+			xclient = new RestHighLevelClient(super.client());
 		} catch (Exception e) {
 			logger.error("-----Elasticsearch Config init Error-----", e);
 		}
