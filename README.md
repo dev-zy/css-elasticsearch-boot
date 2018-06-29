@@ -1,4 +1,4 @@
-# css-elasticsearch-boot
+# share-elasticsearch-boot
 Elasticsearch\u4e0espring-boot\u96c6\u6210\uff0c\u89e3\u51b3jar\u4f9d\u8d56\u4e0e\u4e1a\u52a1\u9879\u76eejar\u5305\u7684\u51b2\u7a81\uff0c\u5e76\u6269\u5c55HTTP\u3001Rest\u3001Transport\u63a5\u53e3\uff0c\u652f\u6301\u538b\u529b\u6d4b\u8bd5
 ## \u4e00\u3001jar\u5305\u51b2\u7a81
 ```
@@ -11,8 +11,8 @@ Elasticsearch\u4e0espring-boot\u96c6\u6210\uff0c\u89e3\u51b3jar\u4f9d\u8d56\u4e0
 ### 1. Maven\u914d\u7f6e
 ```xml
 <dependency>
-    <groupId>com.ucloudlink.css</groupId>
-    <artifactId>css-elasticsearch-boot</artifactId>
+    <groupId>com.devzy.share</groupId>
+    <artifactId>share-elasticsearch-boot</artifactId>
     <version>5.x.x</version>
 </dependency>
 ```

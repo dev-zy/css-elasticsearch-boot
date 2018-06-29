@@ -5,11 +5,11 @@
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
-	<groupId>com.ucloudlink.css</groupId>
-	<artifactId>css-elasticsearch-boot</artifactId>
+	<groupId>com.devzy.share</groupId>
+	<artifactId>share-elasticsearch-boot</artifactId>
 	<version>5.6.8</version>
-	<name>css-elasticsearch-boot</name>
-	<description>css-elasticsearch-boot</description>
+	<name>share-elasticsearch-boot</name>
+	<description>share-elasticsearch-boot</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<java.encoding>UTF-8</java.encoding>
@@ -31,15 +31,15 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/dev-zy/css-elasticsearch-boot</url>
-		<connection>scm:git:git@github.com:dev-zy/css-elasticsearch-boot.git</connection>
-		<developerConnection>scm:git:git@github.com:dev-zy/css-elasticsearch-boot.git</developerConnection>
+		<url>https://github.com/dev-zy/share-elasticsearch-boot</url>
+		<connection>scm:git:git@github.com:dev-zy/share-elasticsearch-boot.git</connection>
+		<developerConnection>scm:git:git@github.com:dev-zy/share-elasticsearch-boot.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
 			<name>Kervin</name>
 			<email>yi.zhang@ucloudlink.com</email>
-			<url>https://github.com/dev-zy/css-elasticsearch-boot</url>
+			<url>https://github.com/dev-zy/share-elasticsearch-boot</url>
 		</developer>
 	</developers>
 	<dependencyManagement>
@@ -235,7 +235,7 @@
 							<platforms>
 								<platform>jsw</platform>
 							</platforms>
-							<mainClass>com.ucloudlink.css.Application</mainClass>
+							<mainClass>com.devzy.share.Application</mainClass>
 							<wrapperLogFile>logs/${project.name}.log</wrapperLogFile>
 							<generatorConfigurations>
 								<generatorConfiguration>

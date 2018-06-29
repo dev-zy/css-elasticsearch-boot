@@ -5,7 +5,7 @@ path="$(cd "${path}";pwd)"
 base=${path}/..
 base_path="$(cd "${base}";pwd)"
 
-app_name=css-elasticsearch-boot
+app_name=share-elasticsearch-boot
 conf=${base_path}/config/application.properties
 log=${base_path}/logs/${app_name}.log
 pid=${base_path}/data/${app_name}.pid
