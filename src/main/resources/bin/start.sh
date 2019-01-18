@@ -68,7 +68,7 @@ then
 	done
 	
 	echo ${app_name} Starting ...
-	# $JAVA $JAVA_OPTS -classpath=.:$CLASSPATH -cp $app:"${base_path}"/*.jar com.devzy.share.Application -spring.config.location=$conf >$log 2>&1 &
+	# $JAVA $JAVA_OPTS -classpath .:$CLASSPATH -cp $app:"${base_path}"/*.jar com.devzy.share.Application -spring.config.location=$conf >$log 2>&1 &
 	$JAVA $JAVA_OPTS -jar $app -spring.config.location=$conf -base.path=${base_path} >$log 2>&1 &
 	echo $! > $pid
 	
